@@ -1,19 +1,42 @@
-import React, { useEffect } from "react";
+import { useState } from 'react';
 
 function App() {
-  useEffect(() => {
-    const tg = window.Telegram?.WebApp;
-    if (tg) {
-      tg.ready();
-      tg.expand();
-    }
-    console.log("Telegram WebApp initialized");
-  }, []);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [responseMsg, setResponseMsg] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const res = await fetch('https://vibbly-backend-production.up.railway.app/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    setResponseMsg(data.message || data.error);
+  };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-white text-gray-800 p-4">
-      <h1 className="text-3xl font-bold mb-4 text-blue-600">Welcome to Vibbly</h1>
-      <p className="text-center">Your social hub inside Telegram 🚀</p>
+    <div style={{ padding: '2rem' }}>
+      <h1>Register to Vibbly</h1>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+        /><br /><br />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        /><br /><br />
+        <button type="submit">Register</button>
+      </form>
+      <p>{responseMsg}</p>
     </div>
   );
 }
