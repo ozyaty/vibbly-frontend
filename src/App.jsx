@@ -1,9 +1,22 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import WebApp from '@twa-dev/sdk';
 
 function App() {
+  const [user, setUser] = useState(null);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [responseMsg, setResponseMsg] = useState('');
+
+  useEffect(() => {
+    // Telegram user data
+    const tgUser = WebApp.initDataUnsafe?.user;
+    if (tgUser) {
+      setUser(tgUser);
+    }
+
+    // Open the WebApp interface
+    WebApp.ready();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,18 +31,20 @@ function App() {
 
   return (
     <div style={{ padding: '2rem' }}>
-      <h1>Register to Vibbly</h1>
+      <h1>Welcome to Vibbly</h1>
+      {user && <p>Logged in as: {user.first_name}</p>}
+
       <form onSubmit={handleSubmit}>
         <input
           type="text"
-          placeholder="Username"
+          placeholder="Create username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           required
         /><br /><br />
         <input
           type="password"
-          placeholder="Password"
+          placeholder="Create password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -42,3 +57,4 @@ function App() {
 }
 
 export default App;
+
