@@ -1,39 +1,62 @@
 import React, { useEffect, useState } from 'react';
-import { BASE_URL } from './api';  // ensure api.js exports your backend URL
+import { BASE_URL } from './api';
 
 function App() {
   const [user, setUser] = useState(null);
   const [feed, setFeed] = useState([]);
 
-  // 1) Authenticate & auto-register on load
   useEffect(() => {
     const tg = window.Telegram?.WebApp;
-    if (!tg) return;
+    console.log('Telegram WebApp object:', tg);
 
-    const initData = tg.initData; 
+    if (!tg) {
+      console.log('No Telegram WebApp found');
+      return;
+    }
+
+    tg.ready();  
+    console.log('Telegram WebApp ready called');
+
+    const initData = tg.initData;
+    console.log('Raw initData:', initData);
+
+    if (!initData) {
+      console.error('No initData available');
+      return;
+    }
+
     fetch(`${BASE_URL}/auth?initData=${encodeURIComponent(initData)}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) setUser(data.user);
+      .then(res => {
+        console.log('Auth response status:', res.status);
+        return res.json();
       })
-      .catch(console.error);
+      .then(data => {
+        console.log('Auth response data:', data);
+        if (data.success) {
+          setUser(data.user);
+        } else {
+          console.error('Auth error:', data.error);
+        }
+      })
+      .catch(err => console.error('Fetch /auth error:', err));
   }, []);
 
-  // 2) Fetch feed once user is set
   useEffect(() => {
     if (!user) return;
+    console.log('Fetching feed for user:', user);
     fetch(`${BASE_URL}/feed`)
       .then(res => res.json())
-      .then(data => setFeed(data.feed))
-      .catch(console.error);
+      .then(data => {
+        console.log('Feed data:', data);
+        setFeed(data.feed);
+      })
+      .catch(err => console.error('Fetch /feed error:', err));
   }, [user]);
 
-  // 3) Loading state
   if (!user) {
     return <p style={{ padding: '2rem' }}>Loading user…</p>;
   }
 
-  // 4) Render feed
   return (
     <div style={{ padding: '2rem' }}>
       <h1>Welcome, {user.first_name}!</h1>
