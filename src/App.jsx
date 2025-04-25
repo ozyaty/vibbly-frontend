@@ -7,50 +7,57 @@ function App() {
 
   useEffect(() => {
     const tg = window.Telegram?.WebApp;
-    console.log('Telegram WebApp object:', tg);
 
     if (!tg) {
-      console.log('No Telegram WebApp found');
+      console.log("❌ Telegram WebApp not found.");
       return;
     }
 
-    tg.ready();  
-    console.log('Telegram WebApp ready called');
-
+    tg.ready();
+    tg.expand();
+    console.log("✅ Telegram WebApp ready.");
+    
     const initData = tg.initData;
-    console.log('Raw initData:', initData);
 
     if (!initData) {
-      console.error('No initData available');
+      console.error("❌ initData not available.");
       return;
     }
+
+    console.log("📦 initData:", initData);
 
     fetch(`${BASE_URL}/auth?initData=${encodeURIComponent(initData)}`)
       .then(res => {
-        console.log('Auth response status:', res.status);
+        console.log("Auth response status:", res.status);
         return res.json();
       })
       .then(data => {
-        console.log('Auth response data:', data);
+        console.log("✅ Auth response:", data);
         if (data.success) {
           setUser(data.user);
         } else {
-          console.error('Auth error:', data.error);
+          console.error("❌ Auth error:", data.error);
         }
       })
-      .catch(err => console.error('Fetch /auth error:', err));
+      .catch(err => {
+        console.error("❌ Fetch /auth error:", err);
+      });
   }, []);
 
   useEffect(() => {
     if (!user) return;
-    console.log('Fetching feed for user:', user);
+
+    console.log("📥 Fetching feed for:", user);
+
     fetch(`${BASE_URL}/feed`)
       .then(res => res.json())
       .then(data => {
-        console.log('Feed data:', data);
+        console.log("✅ Feed data:", data);
         setFeed(data.feed);
       })
-      .catch(err => console.error('Fetch /feed error:', err));
+      .catch(err => {
+        console.error("❌ Fetch /feed error:", err);
+      });
   }, [user]);
 
   if (!user) {
