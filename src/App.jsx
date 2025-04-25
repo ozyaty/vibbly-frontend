@@ -1,3 +1,7 @@
+const tg = window.Telegram?.WebApp;
+console.log("Telegram WebApp object:", tg);
+console.log("User data:", tg?.initDataUnsafe?.user);
+
 import React, { useState, useEffect } from 'react';
 
 function App() {
