@@ -1,50 +1,50 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { BASE_URL } from './api';  // ensure api.js exports your backend URL
 
 function App() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [responseMsg, setResponseMsg] = useState('');
-  const [telegramUser, setTelegramUser] = useState(null);
+  const [user, setUser] = useState(null);
+  const [feed, setFeed] = useState([]);
 
+  // 1) Authenticate & auto-register on load
   useEffect(() => {
-    const user = Telegram.WebApp.initDataUnsafe.user;
-    setTelegramUser(user);
-    console.log(user);  // Log the Telegram user data
+    const tg = window.Telegram?.WebApp;
+    if (!tg) return;
+
+    const initData = tg.initData; 
+    fetch(`${BASE_URL}/auth?initData=${encodeURIComponent(initData)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) setUser(data.user);
+      })
+      .catch(console.error);
   }, []);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const res = await fetch('https://vibbly-backend-production.up.railway.app/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
-    });
-    const data = await res.json();
-    setResponseMsg(data.message || data.error);
-  };
+  // 2) Fetch feed once user is set
+  useEffect(() => {
+    if (!user) return;
+    fetch(`${BASE_URL}/feed`)
+      .then(res => res.json())
+      .then(data => setFeed(data.feed))
+      .catch(console.error);
+  }, [user]);
 
+  // 3) Loading state
+  if (!user) {
+    return <p style={{ padding: '2rem' }}>Loading user…</p>;
+  }
+
+  // 4) Render feed
   return (
     <div style={{ padding: '2rem' }}>
-      <h1>Register to Vibbly</h1>
-      {telegramUser && <p>Hello, {telegramUser.first_name}!</p>}  {/* Display the Telegram user's name */}
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        /><br /><br />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        /><br /><br />
-        <button type="submit">Register</button>
-      </form>
-      <p>{responseMsg}</p>
+      <h1>Welcome, {user.first_name}!</h1>
+      <h2>Your Vibbly Feed</h2>
+      {feed.length === 0 ? (
+        <p>No posts yet.</p>
+      ) : (
+        <ul>
+          {feed.map((item, i) => <li key={i}>{item}</li>)}
+        </ul>
+      )}
     </div>
   );
 }
