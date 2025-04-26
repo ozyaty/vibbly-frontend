@@ -7,32 +7,36 @@ function App() {
 
   useEffect(() => {
     const tg = window.Telegram?.WebApp;
-    console.log('Telegram WebApp object:', tg);
 
     if (!tg) {
-      console.log('❌ No Telegram WebApp object found.');
+      console.error("❌ Telegram WebApp not found");
       return;
     }
 
     tg.ready();
-    console.log('✅ Telegram WebApp ready called');
+    tg.expand();
+    console.log("✅ Telegram WebApp ready");
 
-    let initData = window.location.hash.substring(1); // <--- THIS IS THE TRUE SOURCE OF initData
-    console.log('📦 initData:', initData);
+    const initData = tg.initData;
+    console.log("📦 initData:", initData);
 
     if (!initData) {
-      console.error('❌ No initData available.');
+      console.error("❌ initData not available");
       return;
     }
 
+    // ✅ Correct fetch: POST request with JSON body
     fetch(`${BASE_URL}/auth`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(tg.initDataUnsafe),
+      body: JSON.stringify({ initData: initData }),
     })
-    
+      .then(res => {
+        console.log("Auth response status:", res.status);
+        return res.json();
+      })
       .then(data => {
         console.log("✅ Auth response:", data);
         if (data.success) {
@@ -51,24 +55,15 @@ function App() {
 
     console.log("📥 Fetching feed for:", user);
 
-    fetch(`${BASE_URL}/auth`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ initData: tg.initData }),
-    })
+    fetch(`${BASE_URL}/feed`)
       .then(res => res.json())
       .then(data => {
-        if (data.success) {
-          setUser(data.user);
-        } else {
-          console.error("❌ Auth error:", data.error);
-        }
+        console.log("✅ Feed data:", data);
+        setFeed(data.feed);
       })
       .catch(err => {
-        console.error("❌ Fetch /auth error:", err);
-      });    
+        console.error("❌ Fetch /feed error:", err);
+      });
   }, [user]);
 
   if (!user) {
