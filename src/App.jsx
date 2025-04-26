@@ -17,11 +17,11 @@ function App() {
     tg.expand();
     console.log("✅ Telegram WebApp ready");
 
-    const initData = tg.initData;
-    console.log("📦 initData:", initData);
+    const initDataUnsafe = tg.initDataUnsafe;
+    console.log("📦 initDataUnsafe:", initDataUnsafe);
 
-    if (!initData) {
-      console.error("❌ initData not available");
+    if (!initDataUnsafe || !initDataUnsafe.hash) {
+      console.error("❌ initDataUnsafe not available or invalid");
       return;
     }
 
@@ -30,7 +30,12 @@ function App() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ initData: tg.initData }),
+      body: JSON.stringify({
+        query_id: initDataUnsafe.query_id,
+        user: initDataUnsafe.user,
+        auth_date: initDataUnsafe.auth_date,
+        hash: initDataUnsafe.hash
+      }),
     })
       .then(res => res.json())
       .then(data => {
@@ -44,7 +49,8 @@ function App() {
       .catch(err => {
         console.error("❌ Fetch /auth error:", err);
       });
-  }, []);   // 👈 YOU WERE MISSING THIS LINE!
+
+  }, []);
 
   useEffect(() => {
     if (!user) return;
