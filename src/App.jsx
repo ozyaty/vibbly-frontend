@@ -37,37 +37,10 @@ function App() {
         hash: initDataUnsafe.hash
       }),
     })
-      .then(res => res.json())
-      .then(data => {
-        console.log("✅ Auth response:", data);
-        if (data.success) {
-          setUser(data.user);
-        } else {
-          console.error("❌ Auth error:", data.error);
-        }
-      })
-      .catch(err => {
-        console.error("❌ Fetch /auth error:", err);
-      });
-
-  }, []);
-
-  useEffect(() => {
-    if (!user) return;
-
-    console.log("📥 Fetching feed for:", user);
-
-    fetch(`${BASE_URL}/auth`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ initData: tg.initData }),
-    })
       .then(async (res) => {
         const data = await res.json();
         console.log("✅ Auth response:", data);
-    
+
         if (res.ok && data.success) {
           setUser(data.user);
         } else {
@@ -76,6 +49,22 @@ function App() {
       })
       .catch(err => {
         console.error("❌ Fetch /auth error:", err);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+
+    console.log("📥 Fetching feed for:", user);
+
+    fetch(`${BASE_URL}/feed`)
+      .then(res => res.json())
+      .then(data => {
+        console.log("✅ Feed data:", data);
+        setFeed(data.feed);
+      })
+      .catch(err => {
+        console.error("❌ Fetch /feed error:", err);
       });
   }, [user]);
 
