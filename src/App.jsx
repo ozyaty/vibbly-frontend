@@ -25,18 +25,14 @@ function App() {
       return;
     }
 
-    // ✅ Correct fetch: POST request with JSON body
     fetch(`${BASE_URL}/auth`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ initData: initData }),
+      body: JSON.stringify({ initData: tg.initData }),
     })
-      .then(res => {
-        console.log("Auth response status:", res.status);
-        return res.json();
-      })
+      .then(res => res.json())
       .then(data => {
         console.log("✅ Auth response:", data);
         if (data.success) {
@@ -48,7 +44,7 @@ function App() {
       .catch(err => {
         console.error("❌ Fetch /auth error:", err);
       });
-  }, []);
+  }, []);   // 👈 YOU WERE MISSING THIS LINE!
 
   useEffect(() => {
     if (!user) return;
