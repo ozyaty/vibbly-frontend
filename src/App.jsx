@@ -25,11 +25,14 @@ function App() {
       return;
     }
 
-    fetch(`${BASE_URL}/auth?initData=${encodeURIComponent(initData)}`)
-      .then(res => {
-        console.log("Auth response status:", res.status);
-        return res.json();
-      })
+    fetch(`${BASE_URL}/auth`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(tg.initDataUnsafe),
+    })
+    
       .then(data => {
         console.log("✅ Auth response:", data);
         if (data.success) {
@@ -48,15 +51,24 @@ function App() {
 
     console.log("📥 Fetching feed for:", user);
 
-    fetch(`${BASE_URL}/feed`)
+    fetch(`${BASE_URL}/auth`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ initData: tg.initData }),
+    })
       .then(res => res.json())
       .then(data => {
-        console.log("✅ Feed data:", data);
-        setFeed(data.feed);
+        if (data.success) {
+          setUser(data.user);
+        } else {
+          console.error("❌ Auth error:", data.error);
+        }
       })
       .catch(err => {
-        console.error("❌ Fetch /feed error:", err);
-      });
+        console.error("❌ Fetch /auth error:", err);
+      });    
   }, [user]);
 
   if (!user) {
