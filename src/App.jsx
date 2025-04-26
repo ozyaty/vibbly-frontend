@@ -7,24 +7,23 @@ function App() {
 
   useEffect(() => {
     const tg = window.Telegram?.WebApp;
+    console.log('Telegram WebApp object:', tg);
 
     if (!tg) {
-      console.log("❌ Telegram WebApp not found.");
+      console.log('❌ No Telegram WebApp object found.');
       return;
     }
 
     tg.ready();
-    tg.expand();
-    console.log("✅ Telegram WebApp ready.");
-    
-    const initData = tg.initData;
+    console.log('✅ Telegram WebApp ready called');
+
+    let initData = window.location.hash.substring(1); // <--- THIS IS THE TRUE SOURCE OF initData
+    console.log('📦 initData:', initData);
 
     if (!initData) {
-      console.error("❌ initData not available.");
+      console.error('❌ No initData available.');
       return;
     }
-
-    console.log("📦 initData:", initData);
 
     fetch(`${BASE_URL}/auth?initData=${encodeURIComponent(initData)}`)
       .then(res => {
