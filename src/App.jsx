@@ -1,5 +1,10 @@
+import React from 'react';
 import Register from './Register';
 
-return (
-  <Register />
-);
+function App() {
+  return (
+    <Register />
+  );
+}
+
+export default App;
