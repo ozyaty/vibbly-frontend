@@ -25,20 +25,29 @@ function App() {
 
     fetch(`${BASE_URL}/auth`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(initDataUnsafe),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query_id: initDataUnsafe.query_id,
+        user: JSON.stringify(initDataUnsafe.user),  // important!
+        auth_date: initDataUnsafe.auth_date,
+        hash: initDataUnsafe.hash
+      }),
     })
-      .then(res => res.json())
-      .then(data => {
+      .then(async res => {
+        const data = await res.json();
         console.log("✅ Auth response:", data);
-        if (data.success) {
+        if (res.ok && data.success) {
           setUser(data.user);
         } else {
-          console.error("❌ Auth error:", data.error);
+          console.error("❌ Auth error:", data.error || JSON.stringify(data.detail));
         }
       })
-      .catch(err => console.error("❌ Fetch /auth error:", err));
-  }, []);
+      .catch(err => {
+        console.error("❌ Fetch /auth error:", err);
+      });
+    
 
   if (!user) return <p style={{ padding: '2rem' }}>Loading user…</p>;
 
